@@ -15,9 +15,8 @@
   
   :profiles {:dev {:dependencies [[com.bhauman/figwheel-main "0.2.17"]
                                   [com.bhauman/rebel-readline-cljs "0.1.4"]
-                                  ;; to silence SL4J warnings
-                                  [org.slf4j/slf4j-log4j12 "1.7.30"] 
-                                  ]}}
+                                  [org.slf4j/slf4j-reload4j "2.0.6"]]}}
+
 
   :aliases {"fig"       ["trampoline" "run" "-m" "figwheel.main"]
             "fig:build" ["trampoline" "run" "-m" "figwheel.main" "-b" "flappy" "-r"]})
