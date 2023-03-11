@@ -20,6 +20,8 @@
 (def pillar-gap 158) ;; 158
 (def pillar-width 46)
 
+(def pillar-counter (atom 0))
+
 (def starting-state {:timer-running false
                      :jump-count 0
                      :initial-vel 0
@@ -147,13 +149,18 @@
 
 (defn px [n] (str n "px"))
 
-(defn pillar [{:keys [cur-x pos-x upper-height lower-height]}]
-  (sab/html
-   [:div.pillars
-    [:div.pillar.pillar-upper {:style {:left (px cur-x)
-                                       :height upper-height}}]
-    [:div.pillar.pillar-lower {:style {:left (px cur-x)
-                                       :height lower-height}}]]))
+(defn next-pillar-key []
+  (log/debug (str "time for another pillar! current-counter: " @pillar-counter))
+  (do (swap! pillar-counter inc) @pillar-counter))
+
+(defn pillar-fn [{:keys [cur-x pos-x upper-height lower-height]}]
+  (let [pillar-key (next-pillar-key)]
+    (sab/html
+     [:div.pillars {:key pillar-key}
+      [:div.pillar {:style {:left (px cur-x)
+                            :height upper-height}}]
+      [:div.pillar {:style {:left (px cur-x)
+                            :height lower-height}}]])))
 
 
 ;; https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
@@ -171,22 +178,20 @@
 
 (defn main-template [{:keys [score cur-time jump-count
                              timer-running border-pos
-                             flappy-y pillar-list]}]
-  (log/info (str "starting main-template! (INFO level)"))  
-  (sab/html [:div.board {:key "board"
-                         :onMouseDown (fn [e]
+                             flappy-y pillar-list] :as world}]
+  (log/debug (str "starting main-template with world: " world))
+  (reset! pillar-counter 0)
+  (sab/html [:div.board {:onMouseDown (fn [e]
                                         (swap! flap-state jump)
                                         (.preventDefault e))}
-             [:h1.score {:key "score"} score]
+             [:h1.score score]
              (if-not timer-running
                (sab/html [:a.start-button {:onClick #(start-game)}
                 (if (< 1 jump-count) "Herstart" "Start")])
                (sab/html [:span]))
-             [:div {:key "pillar-containers"} (map pillar pillar-list)]
-             [:div.flappy {:key "flappy"
-                           :style {:top (px flappy-y)}}]
-             [:div.scrolling-border {:key "scrolling-border"
-                                     :style { :background-position-x (px border-pos)}}]]))
+             [:div (map pillar-fn pillar-list)]
+             [:div.flappy {:style {:top (px flappy-y)}}]
+             [:div.scrolling-border {:style {:background-position-x (px border-pos)}}]]))
 
 (let [node (.getElementById js/document "board-area")]
   (defn renderer [full-state]
