@@ -175,18 +175,21 @@
 (defn main-template [{:keys [score cur-time jump-count
                              timer-running border-pos
                              flappy-y pillar-list]}]
-  (sab/html [:div.board { :onMouseDown (fn [e]
-                                         (swap! flap-state jump)
-                                         (.preventDefault e))}
-             [:h1.score score]
   (log/info (str "starting main-template! (INFO level)"))  
+  (sab/html [:div.board {:key "board"
+                         :onMouseDown (fn [e]
+                                        (swap! flap-state jump)
+                                        (.preventDefault e))}
+             [:h1.score {:key "score"} score]
              (if-not timer-running
                (sab/html [:a.start-button {:onClick #(start-game)}
                 (if (< 1 jump-count) "RESTART" "START")])
                (sab/html [:span]))
-             [:div (map pillar pillar-list)]
-             [:div.flappy {:style {:top (px flappy-y)}}]
-             [:div.scrolling-border {:style { :background-position-x (px border-pos)}}]]))
+             [:div {:key "pillar-containers"} (map pillar pillar-list)]
+             [:div.flappy {:key "flappy"
+                           :style {:top (px flappy-y)}}]
+             [:div.scrolling-border {:key "scrolling-border"
+                                     :style { :background-position-x (px border-pos)}}]]))
 
 (let [node (.getElementById js/document "board-area")]
   (defn renderer [full-state]
