@@ -30,7 +30,7 @@
                      [{:start-time 0
                        :pos-x 900
                        :cur-x 900
-                       :gap-top 200 }]})
+                       :gap-top 200}]})
 
 (defn reset-state [_ cur-time]
   (-> starting-state
@@ -180,7 +180,7 @@
              [:h1.score {:key "score"} score]
              (if-not timer-running
                (sab/html [:a.start-button {:onClick #(start-game)}
-                (if (< 1 jump-count) "RESTART" "START")])
+                (if (< 1 jump-count) "Herstart" "Start")])
                (sab/html [:span]))
              [:div {:key "pillar-containers"} (map pillar pillar-list)]
              [:div.flappy {:key "flappy"
