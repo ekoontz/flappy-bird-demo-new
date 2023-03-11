@@ -20,25 +20,25 @@
 (def pillar-gap 158) ;; 158
 (def pillar-width 46)
 
-(def starting-state { :timer-running false
-                      :jump-count 0
-                      :initial-vel 0
-                      :start-time 0
-                      :flappy-start-time 0
-                      :flappy-y start-y
-                      :pillar-list
-                      [{ :start-time 0
-                         :pos-x 900
-                         :cur-x 900
-                         :gap-top 200 }]})
+(def starting-state {:timer-running false
+                     :jump-count 0
+                     :initial-vel 0
+                     :start-time 0
+                     :flappy-start-time 0
+                     :flappy-y start-y
+                     :pillar-list
+                     [{:start-time 0
+                       :pos-x 900
+                       :cur-x 900
+                       :gap-top 200 }]})
 
 (defn reset-state [_ cur-time]
   (-> starting-state
       (update :pillar-list (partial map #(assoc % :start-time cur-time)))
       (assoc
-          :start-time cur-time
-          :flappy-start-time cur-time
-          :timer-running true)))
+       :start-time cur-time
+       :flappy-start-time cur-time
+       :timer-running true)))
 
 (defonce flap-state (atom starting-state))
 
@@ -110,8 +110,8 @@
 (defn time-update [timestamp state]
   (-> state
       (assoc
-          :cur-time timestamp
-          :time-delta (- timestamp (:flappy-start-time state)))
+       :cur-time timestamp
+       :time-delta (- timestamp (:flappy-start-time state)))
       update-flappy
       update-pillars
       collision?
@@ -132,8 +132,8 @@
 
 (defn pillar-offset [{:keys [gap-top] :as p}]
   (assoc p
-    :upper-height gap-top
-    :lower-height (- bottom-y gap-top pillar-gap)))
+         :upper-height gap-top
+         :lower-height (- bottom-y gap-top pillar-gap)))
 
 (defn pillar-offsets [state]
   (update-in state [:pillar-list]
