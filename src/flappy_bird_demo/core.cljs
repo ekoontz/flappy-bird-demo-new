@@ -3,6 +3,7 @@
    [cljsjs.react]
    [cljsjs.react.dom]
    [sablono.core :as sab :include-macros true]))
+   [ekoontz.log :as log]))
 
 (defn floor [x] (.floor js/Math x))
 
@@ -156,6 +157,8 @@
     [:div.pillar.pillar-lower {:style {:left (px cur-x)
                                        :height lower-height}}]]))
 
+
+;; https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
 (defn time-loop [time]
   (let [new-state (swap! flap-state (partial time-update time))]
     (when (:timer-running new-state)
@@ -176,6 +179,7 @@
                                          (swap! flap-state jump)
                                          (.preventDefault e))}
              [:h1.score score]
+  (log/info (str "starting main-template! (INFO level)"))  
              (if-not timer-running
                (sab/html [:a.start-button {:onClick #(start-game)}
                 (if (< 1 jump-count) "RESTART" "START")])
