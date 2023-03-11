@@ -157,10 +157,10 @@
   (let [pillar-key (next-pillar-key)]
     (sab/html
      [:div.pillars {:key pillar-key}
-      [:div.pillar {:style {:left (px cur-x)
-                            :height upper-height}}]
-      [:div.pillar {:style {:left (px cur-x)
-                            :height lower-height}}]])))
+      [:div.pillar.pillar-upper {:style {:left (px cur-x)
+                                         :height upper-height}}]
+      [:div.pillar.pillar-lower {:style {:left (px cur-x)
+                                         :height lower-height}}]])))
 
 
 ;; https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
