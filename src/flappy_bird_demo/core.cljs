@@ -1,8 +1,6 @@
 (ns flappy-bird-demo.core
   (:require
-   [cljsjs.react]
-   [cljsjs.react.dom]
-   [sablono.core :as sab :include-macros true]))
+   [sablono.core :as sab :include-macros true]
    [ekoontz.log :as log]))
 
 (defn floor [x] (.floor js/Math x))
@@ -27,7 +25,6 @@
                       :initial-vel 0
                       :start-time 0
                       :flappy-start-time 0
-                      :flappy-y   start-y
                       :pillar-list
                       [{ :start-time 0
                          :pos-x 900
@@ -122,9 +119,9 @@
 (defn jump [{:keys [cur-time jump-count] :as state}]
   (-> state
       (assoc
-          :jump-count (inc jump-count)
-          :flappy-start-time cur-time
-          :initial-vel jump-vel)))
+       :jump-count (inc jump-count)
+       :flappy-start-time cur-time
+       :initial-vel jump-vel)))
 
 ;; derivatives
 
@@ -163,7 +160,6 @@
   (let [new-state (swap! flap-state (partial time-update time))]
     (when (:timer-running new-state)
       (.requestAnimationFrame js/window time-loop))))
-
 
 (defn start-game []
   (.requestAnimationFrame
