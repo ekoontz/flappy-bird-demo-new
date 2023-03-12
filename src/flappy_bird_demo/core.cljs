@@ -1,22 +1,12 @@
 (ns flappy-bird-demo.core
   (:require
    [sablono.core :as sab :include-macros true]
-   [ekoontz.log :as log]
-   [flappybird.pillars :as pillars]))
-
-(defn floor [x] (.floor js/Math x))
-
-(defn translate [start-pos vel time]
-  (floor (+ start-pos (* time vel))))
-
-(def horiz-vel -0.05)
-(def gravity 0.002)
-(def jump-vel 2)
-(def start-y 312)
-(def bottom-y 561)
-(def flappy-x 212)
-(def flappy-width 57)
-(def flappy-height 41)
+   [flappybird.defs :refer [bottom-y horiz-vel gravity jump-vel start-y
+                            flappy-x flappy-width flappy-height]]
+   [flappybird.log :as log]
+   [flappybird.pillars :refer [in-pillar? in-pillar-gap? pillar-counter
+                               pillar-offsets pillar-spacing update-pillars]]
+   [flappybird.util :refer [floor translate]]))
 
 (def starting-state {:timer-running false
                      :jump-count 0
@@ -42,62 +32,6 @@
 
 (defn bottom-collision? [{:keys [flappy-y]}]
   (>= flappy-y (- bottom-y flappy-height)))
-
-;; <pillars>
-(def pillar-spacing 324)
-(def pillar-gap 158)
-(def pillar-width 46)
-(def pillar-counter (atom 0))
-
-(defn curr-pillar-pos [cur-time {:keys [pos-x start-time]}]
-  (translate pos-x horiz-vel (- cur-time start-time)))
-
-(defn in-pillar? [{:keys [cur-x]}]
-  (and (>= (+ flappy-x flappy-width) cur-x)
-       (< flappy-x (+ cur-x pillar-width))))
-
-(defn in-pillar-gap? [{:keys [flappy-y]} {:keys [gap-top]}]
-  (and (< gap-top flappy-y)
-       (> (+ gap-top pillar-gap)
-          (+ flappy-y flappy-height))))
-
-(defn new-pillar [cur-time pos-x]
-  (let [gap-top (+ 60 (rand-int (- bottom-y 120 pillar-gap)))]
-    {:start-time cur-time
-     :pos-x      pos-x
-     :cur-x      pos-x
-     :gap-top    gap-top}))
-
-(defn update-pillars [{:keys [pillar-list cur-time] :as world-state}]
-  (log/debug (str "update-pillars: world-state keys: " (keys world-state)))
-  (let [pillars-with-pos (map #(assoc % :cur-x (curr-pillar-pos cur-time %)) pillar-list)
-
-        ;; https://clojuredocs.org/clojure.core/sort-by
-        pillars-in-world (sort-by
-                          :cur-x
-                          (filter #(> (:cur-x %) (- pillar-width)) pillars-with-pos))]
-    (log/debug (str "pillars with-pos: " pillars-with-pos))
-    (assoc world-state
-      :pillar-list
-      (if (< (count pillars-in-world) pillars/number-of-pillars)
-        (let [new-pillar (new-pillar
-                          cur-time
-                          (+ pillar-spacing
-                             (:cur-x (last pillars-in-world))))]
-          (log/info (str "ADDING A NEW PILLAR: " new-pillar))
-          (conj pillars-in-world new-pillar))
-        pillars-in-world))))
-
-(defn pillar-offset [{:keys [gap-top] :as p}]
-  (assoc p
-         :upper-height gap-top
-         :lower-height (- bottom-y gap-top pillar-gap)))
-
-(defn pillar-offsets [state]
-  (update-in state [:pillar-list]
-             (fn [pillar-list]
-               (map pillar-offset pillar-list))))
-;; </pillars>
 
 (defn collision? [{:keys [pillar-list] :as st}]
   (if (some #(or (and (in-pillar? %)

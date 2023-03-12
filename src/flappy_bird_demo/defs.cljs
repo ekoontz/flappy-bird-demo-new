@@ -1,0 +1,10 @@
+(ns flappybird.defs)
+
+(def bottom-y 561)
+(def horiz-vel -0.05)
+(def gravity 0.002)
+(def jump-vel 2)
+(def start-y 312)
+(def flappy-x 212)
+(def flappy-width 57)
+(def flappy-height 41)

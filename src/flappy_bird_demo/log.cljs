@@ -1,4 +1,4 @@
-(ns ekoontz.log)
+(ns flappybird.log)
 
 ;; thanks to all the commenters on
 ;; https://stackoverflow.com/questions/24239144/js-console-log-in-clojurescript
