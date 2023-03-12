@@ -1,7 +1,8 @@
 (ns flappy-bird-demo.core
   (:require
    [sablono.core :as sab :include-macros true]
-   [ekoontz.log :as log]))
+   [ekoontz.log :as log]
+   [flappybird.pillars :as pillars]))
 
 (defn floor [x] (.floor js/Math x))
 
@@ -16,11 +17,6 @@
 (def flappy-x 212)
 (def flappy-width 57)
 (def flappy-height 41)
-(def pillar-spacing 324)
-(def pillar-gap 158)
-(def pillar-width 46)
-
-(def pillar-counter (atom 0))
 
 (def starting-state {:timer-running false
                      :jump-count 0
@@ -44,6 +40,15 @@
 
 (defonce world-reference (atom starting-state))
 
+(defn bottom-collision? [{:keys [flappy-y]}]
+  (>= flappy-y (- bottom-y flappy-height)))
+
+;; <pillars>
+(def pillar-spacing 324)
+(def pillar-gap 158)
+(def pillar-width 46)
+(def pillar-counter (atom 0))
+
 (defn curr-pillar-pos [cur-time {:keys [pos-x start-time]}]
   (translate pos-x horiz-vel (- cur-time start-time)))
 
@@ -56,16 +61,6 @@
        (> (+ gap-top pillar-gap)
           (+ flappy-y flappy-height))))
 
-(defn bottom-collision? [{:keys [flappy-y]}]
-  (>= flappy-y (- bottom-y flappy-height)))
-
-(defn collision? [{:keys [pillar-list] :as st}]
-  (if (some #(or (and (in-pillar? %)
-                      (not (in-pillar-gap? st %)))
-                 (bottom-collision? st)) pillar-list)
-    (assoc st :timer-running false)
-    st))
-
 (defn new-pillar [cur-time pos-x]
   (let [gap-top (+ 60 (rand-int (- bottom-y 120 pillar-gap)))]
     {:start-time cur-time
@@ -73,10 +68,8 @@
      :cur-x      pos-x
      :gap-top    gap-top}))
 
-(defonce number-of-pillars 3)
-
 (defn update-pillars [{:keys [pillar-list cur-time] :as world-state}]
-  (log/info (str "update-pillars: world-state keys: " (keys world-state)))
+  (log/debug (str "update-pillars: world-state keys: " (keys world-state)))
   (let [pillars-with-pos (map #(assoc % :cur-x (curr-pillar-pos cur-time %)) pillar-list)
 
         ;; https://clojuredocs.org/clojure.core/sort-by
@@ -86,7 +79,7 @@
     (log/debug (str "pillars with-pos: " pillars-with-pos))
     (assoc world-state
       :pillar-list
-      (if (< (count pillars-in-world) number-of-pillars)
+      (if (< (count pillars-in-world) pillars/number-of-pillars)
         (let [new-pillar (new-pillar
                           cur-time
                           (+ pillar-spacing
@@ -95,13 +88,31 @@
           (conj pillars-in-world new-pillar))
         pillars-in-world))))
 
+(defn pillar-offset [{:keys [gap-top] :as p}]
+  (assoc p
+         :upper-height gap-top
+         :lower-height (- bottom-y gap-top pillar-gap)))
+
+(defn pillar-offsets [state]
+  (update-in state [:pillar-list]
+             (fn [pillar-list]
+               (map pillar-offset pillar-list))))
+;; </pillars>
+
+(defn collision? [{:keys [pillar-list] :as st}]
+  (if (some #(or (and (in-pillar? %)
+                      (not (in-pillar-gap? st %)))
+                 (bottom-collision? st)) pillar-list)
+    (assoc st :timer-running false)
+    st))
+
 (defn sine-wave [st]
   (assoc st
     :flappy-y
     (+ start-y (* 30 (.sin js/Math (/ (:time-delta st) 300))))))
 
 (defn update-flappy [{:keys [time-delta initial-vel flappy-y jump-count] :as world-state}]
-  (log/info (str "update-flappy:  world-state keys: " (keys world-state)))
+  (log/debug (str "update-flappy:  world-state keys: " (keys world-state)))
   (if (pos? jump-count)
     (let [cur-vel (- initial-vel (* time-delta gravity))
           new-y   (- flappy-y cur-vel)
@@ -140,16 +151,6 @@
 (defn border [{:keys [cur-time] :as state}]
   (-> state
       (assoc :border-pos (mod (translate 0 horiz-vel cur-time) 23))))
-
-(defn pillar-offset [{:keys [gap-top] :as p}]
-  (assoc p
-         :upper-height gap-top
-         :lower-height (- bottom-y gap-top pillar-gap)))
-
-(defn pillar-offsets [state]
-  (update-in state [:pillar-list]
-             (fn [pillar-list]
-               (map pillar-offset pillar-list))))
 
 (defn world [state]
   (-> state
