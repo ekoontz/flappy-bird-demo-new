@@ -67,6 +67,7 @@
     st))
 
 (defn new-pillar [cur-time pos-x]
+  (log/info (str "creating a new pillar!"))
   {:start-time cur-time
    :pos-x      pos-x
    :cur-x      pos-x
