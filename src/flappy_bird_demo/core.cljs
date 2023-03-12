@@ -68,25 +68,30 @@
 
 (defn new-pillar [cur-time pos-x]
   (let [gap-top (+ 60 (rand-int (- bottom-y 120 pillar-gap)))]
-    (log/info (str "creating a new pillar with gap-top: " gap-top))
     {:start-time cur-time
      :pos-x      pos-x
      :cur-x      pos-x
      :gap-top    gap-top}))
-  
-(defn update-pillars [{:keys [pillar-list cur-time] :as st}]
+
+(defonce number-of-pillars 3)
+
+(defn update-pillars [{:keys [pillar-list cur-time] :as pillar-state}]
   (let [pillars-with-pos (map #(assoc % :cur-x (curr-pillar-pos cur-time %)) pillar-list)
+
+        ;; https://clojuredocs.org/clojure.core/sort-by
         pillars-in-world (sort-by
                           :cur-x
                           (filter #(> (:cur-x %) (- pillar-width)) pillars-with-pos))]
-    (assoc st
+    (log/debug (str "pillars with-pos: " pillars-with-pos))
+    (assoc pillar-state
       :pillar-list
-      (if (< (count pillars-in-world) 3)
-        (conj pillars-in-world
-              (new-pillar
-               cur-time
-               (+ pillar-spacing
-                  (:cur-x (last pillars-in-world)))))
+      (if (< (count pillars-in-world) number-of-pillars)
+        (let [new-pillar (new-pillar
+                          cur-time
+                          (+ pillar-spacing
+                             (:cur-x (last pillars-in-world))))]
+          (log/info (str "ADDING A NEW PILLAR: " new-pillar))
+          (conj pillars-in-world new-pillar))
         pillars-in-world))))
 
 (defn sine-wave [st]
