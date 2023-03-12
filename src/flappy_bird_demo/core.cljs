@@ -17,7 +17,7 @@
 (def flappy-width 57)
 (def flappy-height 41)
 (def pillar-spacing 324)
-(def pillar-gap 158) ;; 158
+(def pillar-gap 158)
 (def pillar-width 46)
 
 (def pillar-counter (atom 0))
