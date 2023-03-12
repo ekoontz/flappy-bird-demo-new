@@ -75,7 +75,8 @@
 
 (defonce number-of-pillars 3)
 
-(defn update-pillars [{:keys [pillar-list cur-time] :as pillar-state}]
+(defn update-pillars [{:keys [pillar-list cur-time] :as world-state}]
+  (log/info (str "update-pillars: world-state keys: " (keys world-state)))
   (let [pillars-with-pos (map #(assoc % :cur-x (curr-pillar-pos cur-time %)) pillar-list)
 
         ;; https://clojuredocs.org/clojure.core/sort-by
@@ -83,7 +84,7 @@
                           :cur-x
                           (filter #(> (:cur-x %) (- pillar-width)) pillars-with-pos))]
     (log/debug (str "pillars with-pos: " pillars-with-pos))
-    (assoc pillar-state
+    (assoc world-state
       :pillar-list
       (if (< (count pillars-in-world) number-of-pillars)
         (let [new-pillar (new-pillar
@@ -99,16 +100,17 @@
     :flappy-y
     (+ start-y (* 30 (.sin js/Math (/ (:time-delta st) 300))))))
 
-(defn update-flappy [{:keys [time-delta initial-vel flappy-y jump-count] :as st}]
+(defn update-flappy [{:keys [time-delta initial-vel flappy-y jump-count] :as world-state}]
+  (log/info (str "update-flappy:  world-state keys: " (keys world-state)))
   (if (pos? jump-count)
     (let [cur-vel (- initial-vel (* time-delta gravity))
           new-y   (- flappy-y cur-vel)
           new-y   (if (> new-y (- bottom-y flappy-height))
                     (- bottom-y flappy-height)
                     new-y)]
-      (assoc st
+      (assoc world-state
         :flappy-y new-y))
-    (sine-wave st)))
+    (sine-wave world-state)))
 
 (defn score [{:keys [cur-time start-time] :as st}]
   (let [score (- (.abs js/Math (floor (/ (- (* (- cur-time start-time) horiz-vel) 544)
