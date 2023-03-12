@@ -42,7 +42,7 @@
        :flappy-start-time cur-time
        :timer-running true)))
 
-(defonce flap-state (atom starting-state))
+(defonce world-reference (atom starting-state))
 
 (defn curr-pillar-pos [cur-time {:keys [pos-x start-time]}]
   (translate pos-x horiz-vel (- cur-time start-time)))
@@ -164,7 +164,7 @@
 
 
 (defn time-loop [time]
-  (let [new-state (swap! flap-state (partial time-update time))]
+  (let [new-state (swap! world-reference (partial time-update time))]
     (when (:timer-running new-state)
       ;; https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
       (.requestAnimationFrame js/window time-loop))))
@@ -173,16 +173,15 @@
   (.requestAnimationFrame
    js/window
    (fn [time]
-     (reset! flap-state (reset-state @flap-state time))
+     (reset! world-reference (reset-state @world-reference time))
      (time-loop time))))
 
 (defn main-template [{:keys [score cur-time jump-count
                              timer-running border-pos
                              flappy-y pillar-list] :as world}]
-  (log/debug (str "starting main-template with world: " world))
   (reset! pillar-counter 0)
   (sab/html [:div.board {:onMouseDown (fn [e]
-                                        (swap! flap-state jump)
+                                        (swap! world-reference jump)
                                         (.preventDefault e))}
              [:h1.score score]
              (if-not timer-running
@@ -193,9 +192,9 @@
              [:div.flappy {:style {:top (px flappy-y)}}]
              [:div.scrolling-border {:style {:background-position-x (px border-pos)}}]]))
 
-(defn renderer [full-state]
+(defn renderer [world-state]
   ;; https://beta.reactjs.org/reference/react-dom/render
-  (.render js/ReactDOM (main-template full-state)
+  (.render js/ReactDOM (main-template world-state)
            ;; see index.html for <div id='board-area'>:
            (.getElementById js/document "board-area")))
 
@@ -206,11 +205,11 @@
 ;;  Keys [in our case, ':renderer' is such a key] must be unique
 ;;  per reference, and can be used to remove the watch with remove-watch,
 ;;  but are otherwise considered opaque by the watch mechanism."
-(add-watch flap-state :renderer-of-flappy
-           (fn [key reference old-state new-state]
+(add-watch world-reference :renderer-of-flappy
+           (fn [key reference old-state new-world-state]
              ;; note that all of these provided arguments
              ;; are ignored *except* new-state:
-             (log/info (str "flap-state has changed to new-state: " new-state "; time to call (renderer)!"))
-             (renderer (world new-state))))
+             (log/info (str "world-reference has changed to: " new-world-state "; time to call (renderer)!"))
+             (renderer (world new-world-state))))
 
-(reset! flap-state @flap-state)
+(reset! world-reference @world-reference)
