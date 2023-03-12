@@ -163,10 +163,10 @@
                                          :height lower-height}}]])))
 
 
-;; https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
 (defn time-loop [time]
   (let [new-state (swap! flap-state (partial time-update time))]
     (when (:timer-running new-state)
+      ;; https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
       (.requestAnimationFrame js/window time-loop))))
 
 (defn start-game []
@@ -193,11 +193,24 @@
              [:div.flappy {:style {:top (px flappy-y)}}]
              [:div.scrolling-border {:style {:background-position-x (px border-pos)}}]]))
 
-(let [node (.getElementById js/document "board-area")]
-  (defn renderer [full-state]
-    (.render js/ReactDOM (main-template full-state) node)))
+(defn renderer [full-state]
+  ;; https://beta.reactjs.org/reference/react-dom/render
+  (.render js/ReactDOM (main-template full-state)
+           ;; see index.html for <div id='board-area'>:
+           (.getElementById js/document "board-area")))
 
-(add-watch flap-state :renderer (fn [_ _ _ n]
-                                  (renderer (world n))))
+;; https://clojuredocs.org/clojure.core/add-watch
+;; "Adds a watch function to an agent/atom/var/ref reference...
+;;  Whenever the reference's state might have been changed,
+;;  any registered watches will have their functions called...
+;;  Keys [in our case, ':renderer' is such a key] must be unique
+;;  per reference, and can be used to remove the watch with remove-watch,
+;;  but are otherwise considered opaque by the watch mechanism."
+(add-watch flap-state :renderer-of-flappy
+           (fn [key reference old-state new-state]
+             ;; note that all of these provided arguments
+             ;; are ignored *except* new-state:
+             (log/info (str "flap-state has changed to new-state: " new-state "; time to call (renderer)!"))
+             (renderer (world new-state))))
 
 (reset! flap-state @flap-state)
