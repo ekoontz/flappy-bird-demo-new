@@ -4,9 +4,9 @@
    [flappybird.defs :refer [bottom-y horiz-vel gravity jump-vel start-y
                             flappy-x flappy-width flappy-height]]
    [flappybird.log :as log]
-   [flappybird.pillars :refer [in-pillar? in-pillar-gap? pillar-counter
+   [flappybird.pillars :refer [in-pillar? in-pillar-gap? pillar-counter pillar-fn
                                pillar-offsets pillar-spacing update-pillars]]
-   [flappybird.util :refer [floor translate]]))
+   [flappybird.util :refer [floor px translate]]))
 
 (def starting-state {:timer-running false
                      :jump-count 0
@@ -19,14 +19,6 @@
                        :pos-x 900
                        :cur-x 900
                        :gap-top 200}]})
-
-(defn reset-state [_ cur-time]
-  (-> starting-state
-      (update :pillar-list (partial map #(assoc % :start-time cur-time)))
-      (assoc
-       :start-time cur-time
-       :flappy-start-time cur-time
-       :timer-running true)))
 
 (defonce world-reference (atom starting-state))
 
@@ -91,8 +83,6 @@
       border
       pillar-offsets))
 
-(defn px [n] (str n "px"))
-
 (defn next-pillar-key []
   (log/debug (str "time for another pillar! current-counter: " @pillar-counter))
   (do (swap! pillar-counter inc) @pillar-counter))
@@ -113,6 +103,14 @@
     (when (:timer-running new-state)
       ;; https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
       (.requestAnimationFrame js/window time-loop))))
+
+(defn reset-state [_ cur-time]
+  (-> starting-state
+      (update :pillar-list (partial map #(assoc % :start-time cur-time)))
+      (assoc
+       :start-time cur-time
+       :flappy-start-time cur-time
+       :timer-running true)))
 
 (defn start-game []
   (.requestAnimationFrame

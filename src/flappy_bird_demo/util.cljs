@@ -7,3 +7,5 @@
 (defn translate [start-pos vel time]
   (floor (+ start-pos (* time vel))))
 
+(defn px [n] (str n "px"))
+

@@ -2,7 +2,8 @@
   (:require
    [flappybird.defs :refer [bottom-y horiz-vel gravity jump-vel start-y flappy-x flappy-width flappy-height]]
    [flappybird.log :as log]
-   [flappybird.util :refer [translate]]))
+   [flappybird.util :refer [translate]]
+   [sablono.core :as sab :include-macros true]))
 
 (defonce number-of-pillars 3)
 (def pillar-spacing 324)
@@ -59,3 +60,12 @@
              (fn [pillar-list]
                (map pillar-offset pillar-list))))
 
+(defn pillar-fn [{:keys [cur-x pos-x upper-height lower-height]}]
+  (let [pillar-key (next-pillar-key)]
+    ;; https://github.com/r0man/sablono
+    (sab/html
+     [:div.pillars {:key pillar-key}
+      [:div.pillar.pillar-upper {:style {:left (px cur-x)
+                                         :height upper-height}}]
+      [:div.pillar.pillar-lower {:style {:left (px cur-x)
+                                         :height lower-height}}]])))
