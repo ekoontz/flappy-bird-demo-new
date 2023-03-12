@@ -67,12 +67,13 @@
     st))
 
 (defn new-pillar [cur-time pos-x]
-  (log/info (str "creating a new pillar!"))
-  {:start-time cur-time
-   :pos-x      pos-x
-   :cur-x      pos-x
-   :gap-top    (+ 60 (rand-int (- bottom-y 120 pillar-gap)))})
-
+  (let [gap-top (+ 60 (rand-int (- bottom-y 120 pillar-gap)))]
+    (log/info (str "creating a new pillar with gap-top: " gap-top))
+    {:start-time cur-time
+     :pos-x      pos-x
+     :cur-x      pos-x
+     :gap-top    gap-top}))
+  
 (defn update-pillars [{:keys [pillar-list cur-time] :as st}]
   (let [pillars-with-pos (map #(assoc % :cur-x (curr-pillar-pos cur-time %)) pillar-list)
         pillars-in-world (sort-by
@@ -156,6 +157,7 @@
 
 (defn pillar-fn [{:keys [cur-x pos-x upper-height lower-height]}]
   (let [pillar-key (next-pillar-key)]
+    ;; https://github.com/r0man/sablono
     (sab/html
      [:div.pillars {:key pillar-key}
       [:div.pillar.pillar-upper {:style {:left (px cur-x)
@@ -181,6 +183,7 @@
                              timer-running border-pos
                              flappy-y pillar-list] :as world}]
   (reset! pillar-counter 0)
+  ;; https://github.com/r0man/sablono
   (sab/html [:div.board {:onMouseDown (fn [e]
                                         (swap! world-reference jump)
                                         (.preventDefault e))}
