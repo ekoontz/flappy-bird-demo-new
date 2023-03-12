@@ -202,14 +202,19 @@
 ;; "Adds a watch function to an agent/atom/var/ref reference...
 ;;  Whenever the reference's state might have been changed,
 ;;  any registered watches will have their functions called...
-;;  Keys [in our case, ':renderer' is such a key] must be unique
+;;  Keys [in our case, ':renderer-of-the-world' is such a key] must be unique
 ;;  per reference, and can be used to remove the watch with remove-watch,
 ;;  but are otherwise considered opaque by the watch mechanism."
-(add-watch world-reference :renderer-of-flappy
-           (fn [key reference old-state new-world-state]
+(add-watch world-reference :renderer-of-the-world
+           (fn [key reference old-world-state new-world-state]
              ;; note that all of these provided arguments
              ;; are ignored *except* new-state:
-             (log/info (str "world-reference has changed to: " new-world-state "; time to call (renderer)!"))
+             (log/debug (str "world-reference has changed to: " new-world-state "; time to call (renderer)!"))
              (renderer (world new-world-state))))
 
-(reset! world-reference @world-reference)
+(defn get-this-party-started []
+  (log/info (str "let's get this party started!"))
+  ;; this causes the above ':renderer-of-the-world' watch to fire:
+  (reset! world-reference @world-reference))
+
+(get-this-party-started)
