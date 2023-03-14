@@ -87,17 +87,6 @@
   (log/debug (str "time for another pillar! current-counter: " @pillar-counter))
   (do (swap! pillar-counter inc) @pillar-counter))
 
-(defn pillar-fn [{:keys [cur-x pos-x upper-height lower-height]}]
-  (let [pillar-key (next-pillar-key)]
-    ;; https://github.com/r0man/sablono
-    (sab/html
-     [:div.pillars {:key pillar-key}
-      [:div.pillar.pillar-upper {:style {:left (px cur-x)
-                                         :height upper-height}}]
-      [:div.pillar.pillar-lower {:style {:left (px cur-x)
-                                         :height lower-height}}]])))
-
-
 (defn time-loop [time]
   (let [new-state (swap! world-reference (partial time-update time))]
     (when (:timer-running new-state)
