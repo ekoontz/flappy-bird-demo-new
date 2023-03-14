@@ -2,7 +2,7 @@
   (:require
    [flappybird.defs :refer [bottom-y horiz-vel gravity jump-vel start-y flappy-x flappy-width flappy-height]]
    [flappybird.log :as log]
-   [flappybird.util :refer [translate]]
+   [flappybird.util :refer [px translate]]
    [sablono.core :as sab :include-macros true]))
 
 (defonce number-of-pillars 3)
@@ -59,6 +59,10 @@
   (update-in state [:pillar-list]
              (fn [pillar-list]
                (map pillar-offset pillar-list))))
+
+(defn next-pillar-key []
+  (log/debug (str "time for another pillar! current-counter: " @pillar-counter))
+  (do (swap! pillar-counter inc) @pillar-counter))
 
 (defn pillar-fn [{:keys [cur-x pos-x upper-height lower-height]}]
   (let [pillar-key (next-pillar-key)]
