@@ -1,8 +1,8 @@
 (ns flappybird.pillars
   (:require
    [flappybird.defs :refer [bottom-y horiz-vel gravity jump-vel start-y flappy-x flappy-width flappy-height]]
-   [flappybird.log :as log]
    [flappybird.util :refer [px translate]]
+   [flappybird.log2 :as log]
    [sablono.core :as sab :include-macros true]))
 
 (defonce number-of-pillars 3)

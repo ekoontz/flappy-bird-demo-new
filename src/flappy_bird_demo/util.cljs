@@ -1,6 +1,6 @@
 (ns flappybird.util
   (:require
-   [flappybird.log :as log]))
+   [flappybird.log2 :as log]))
 
 (defn floor [x] (.floor js/Math x))
 

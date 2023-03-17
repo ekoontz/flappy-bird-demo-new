@@ -3,11 +3,10 @@
    [sablono.core :as sab :include-macros true]
    [flappybird.defs :refer [bottom-y horiz-vel gravity jump-vel start-y
                             flappy-x flappy-width flappy-height]]
-   [flappybird.log :as log]
    [flappybird.pillars :refer [in-pillar? in-pillar-gap? pillar-counter pillar-fn
                                pillar-offsets pillar-spacing update-pillars]]
    [flappybird.util :refer [floor px translate]]
-   [flappybird.log2 :as log2]))
+   [flappybird.log2 :as log]))
 
 (def starting-state {:timer-running false
                      :jump-count 0
@@ -39,7 +38,7 @@
     (+ start-y (* 30 (.sin js/Math (/ (:time-delta st) 300))))))
 
 (defn update-flappy [{:keys [time-delta initial-vel flappy-y jump-count] :as world-state}]
-  (log2/info (str "update-flappy:  jumps so far: " jump-count))
+  (log/info (str "update-flappy:  jumps so far: " jump-count))
   (if (pos? jump-count)
     (let [cur-vel (- initial-vel (* time-delta gravity))
           new-y   (- flappy-y cur-vel)
