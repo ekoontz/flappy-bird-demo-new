@@ -32,10 +32,10 @@
     (assoc st :timer-running false)
     st))
 
-(defn sine-wave [st]
-  (assoc st
+(defn sine-wave [world-state]
+  (assoc world-state
     :flappy-y
-    (+ start-y (* 30 (.sin js/Math (/ (:time-delta st) 300))))))
+    (+ start-y (* 30 (.sin js/Math (/ (:time-delta world-state) 300))))))
 
 (defn update-flappy [{:keys [time-delta initial-vel flappy-y jump-count] :as world-state}]
   (log/info (str "update-flappy:  jumps so far: " jump-count))
@@ -49,24 +49,24 @@
         :flappy-y new-y))
     (sine-wave world-state)))
 
-(defn score [{:keys [cur-time start-time] :as st}]
+(defn score [{:keys [cur-time start-time] :as world-state}]
   (let [score (- (.abs js/Math (floor (/ (- (* (- cur-time start-time) horiz-vel) 544)
                                pillar-spacing)))
                  4)]
-  (assoc st :score (if (neg? score) 0 score))))
+    (assoc world-state :score (if (neg? score) 0 score))))
 
-(defn time-update [timestamp state]
-  (-> state
+(defn time-update [timestamp world-state]
+  (-> world-state
       (assoc
        :cur-time timestamp
-       :time-delta (- timestamp (:flappy-start-time state)))
+       :time-delta (- timestamp (:flappy-start-time world-state)))
       update-flappy
       update-pillars
       collision?
       score))
 
-(defn jump [{:keys [cur-time jump-count] :as state}]
-  (-> state
+(defn jump [{:keys [cur-time jump-count] :as world-state}]
+  (-> world-state
       (assoc
        :jump-count (inc jump-count)
        :flappy-start-time cur-time
@@ -74,12 +74,12 @@
 
 ;; derivatives
 
-(defn border [{:keys [cur-time] :as state}]
-  (-> state
+(defn border [{:keys [cur-time] :as world-state}]
+  (-> world-state
       (assoc :border-pos (mod (translate 0 horiz-vel cur-time) 23))))
 
-(defn world [state]
-  (-> state
+(defn world [world-state]
+  (-> world-state
       border
       pillar-offsets))
 
