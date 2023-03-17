@@ -6,7 +6,7 @@
    [flappybird.pillars :refer [in-pillar? in-pillar-gap? pillar-counter pillar-fn
                                pillar-offsets pillar-spacing update-pillars]]
    [flappybird.util :refer [floor px translate]]
-   [flappybird.log2 :as log]))
+   [flappybird.log :as log]))
 
 (def starting-state {:timer-running false
                      :jump-count 0

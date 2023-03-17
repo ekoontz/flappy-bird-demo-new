@@ -1,4 +1,4 @@
-(ns flappybird.log2)
+(ns flappybird.log)
 
 (defmacro info [args]
   `(apply js/console.info (to-array (concat ~[args]))))
