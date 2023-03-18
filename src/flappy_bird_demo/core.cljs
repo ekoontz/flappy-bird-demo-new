@@ -38,7 +38,7 @@
     (+ start-y (* 30 (.sin js/Math (/ (:time-delta world-state) 300))))))
 
 (defn update-flappy [{:keys [time-delta initial-vel flappy-y jump-count] :as world-state}]
-  (log/info (str "update-flappy:  jumps so far: " jump-count))
+  (log/debug (str "update-flappy:  jumps so far: " jump-count))
   (if (pos? jump-count)
     (let [cur-vel (- initial-vel (* time-delta gravity))
           new-y   (- flappy-y cur-vel)
@@ -54,16 +54,6 @@
                                pillar-spacing)))
                  4)]
     (assoc world-state :score (if (neg? score) 0 score))))
-
-(defn time-update [timestamp world-state]
-  (-> world-state
-      (assoc
-       :cur-time timestamp
-       :time-delta (- timestamp (:flappy-start-time world-state)))
-      update-flappy
-      update-pillars
-      collision?
-      score))
 
 (defn jump [{:keys [cur-time jump-count] :as world-state}]
   (-> world-state
@@ -83,9 +73,15 @@
       border
       pillar-offsets))
 
-(defn next-pillar-key []
-  (log/debug (str "time for another pillar! current-counter: " @pillar-counter))
-  (do (swap! pillar-counter inc) @pillar-counter))
+(defn time-update [timestamp world-state]
+  (-> world-state
+      (assoc
+       :cur-time timestamp
+       :time-delta (- timestamp (:flappy-start-time world-state)))
+      update-flappy
+      update-pillars
+      collision?
+      score))
 
 (defn time-loop [time]
   (let [new-state (swap! world-reference (partial time-update time))]
@@ -101,13 +97,26 @@
        :flappy-start-time cur-time
        :timer-running true)))
 
+(declare main-template)
+
 (defn start-game []
+  ;; https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
   (.requestAnimationFrame
    js/window
    (fn [time]
      (reset! world-reference (reset-state @world-reference time))
      (time-loop time))))
 
+(defn renderer [world-state]
+  ;; https://beta.reactjs.org/reference/react-dom/render
+  (.render js/ReactDOM (main-template world-state)
+           ;; see index.html for <div id='board-area'>:
+           (.getElementById js/document "board-area")))
+
+;; add-watch -> renderer -> main-template -> (mousedown) -> jump
+;;                                        -> (click start button) -> start-game -> time-loop      -> time-update
+;;                                                                                                -> requestAnimationFrame -> time-loop
+;;                                                                              -> reset-state
 (defn main-template [{:keys [score cur-time jump-count
                              timer-running border-pos
                              flappy-y pillar-list] :as world}]
@@ -125,23 +134,20 @@
              [:div.flappy {:style {:top (px flappy-y)}}]
              [:div.scrolling-border {:style {:background-position-x (px border-pos)}}]]))
 
-(defn renderer [world-state]
-  ;; https://beta.reactjs.org/reference/react-dom/render
-  (.render js/ReactDOM (main-template world-state)
-           ;; see index.html for <div id='board-area'>:
-           (.getElementById js/document "board-area")))
-
 ;; https://clojuredocs.org/clojure.core/add-watch
 ;; "Adds a watch function to an agent/atom/var/ref reference...
 ;;  Whenever the reference's state might have been changed,
 ;;  any registered watches will have their functions called...
-;;  Keys [in our case, ':renderer-of-the-world' is such a key] must be unique
-;;  per reference, and can be used to remove the watch with remove-watch,
-;;  but are otherwise considered opaque by the watch mechanism."
+;;  Keys must be unique  per reference, and can be used to remove
+;;  the watch with remove-watch, but are otherwise considered
+;;  opaque by the watch mechanism."
+;; 
+;; In our case, ':renderer-of-the-world' is such a key, but we don't yet
+;; use it for anything (e.g. by calling remove-watch). 
 (add-watch world-reference :renderer-of-the-world
            (fn [key reference old-world-state new-world-state]
-             ;; note that all of these provided arguments
-             ;; are ignored *except* new-state:
+             ;; Note that key, reference and old-world-state are all
+             ;; ignored (only new-world-state is used below):
              (log/debug (str "world-reference has changed to: " new-world-state "; time to call (renderer)!"))
              (renderer (world new-world-state))))
 
