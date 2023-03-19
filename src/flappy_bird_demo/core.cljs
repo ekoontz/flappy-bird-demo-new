@@ -94,9 +94,7 @@
            ;; see index.html for <div id='board-area'>:
            (.getElementById js/document "board-area")))
 
-(defn get-this-party-started []
-  (log/info (str "let's get this party started!"))
-  ;; this causes the above ':renderer-of-the-world' watch to fire:
-  (reset! world-reference @world-reference))
+;; this causes the above ':renderer-of-the-world' watch to fire:
+(reset! world-reference @world-reference)
 
-(get-this-party-started)
+
