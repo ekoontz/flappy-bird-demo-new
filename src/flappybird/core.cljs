@@ -6,7 +6,7 @@
    [flappybird.pillars :refer [pillar-counter pillar-fn pillar-offsets]]
    [flappybird.log :as log]
    [flappybird.time-loop :refer [collision? time-loop]]
-   [flappybird.util :refer [px]]))
+   [flappybird.util :refer [format-world-state px]]))
 
 (def starting-state {:timer-running false
                      :jump-count 0
@@ -55,32 +55,6 @@
   (.render js/ReactDOM (main-template world-state)
            ;; see index.html for <div id='board-area'>:
            (.getElementById js/document "board-area")))
-
-(defn indent [this-many]
-  (clojure.string/join (take this-many (repeatedly (fn [] " ")))))
-
-(defn format-world-state [world-state indent-this-many]
-  (let [indentation (indent indent-this-many)
-        indentation-plus-1 (indent (+ 1 indent-this-many))]
-    (cond
-      (or (seq? world-state)
-          (vector? world-state))
-      (str "[\n"
-           (clojure.string/join ",\n" (map (fn [x] (format-world-state
-                                                    x
-                                                    (+ 1 indent-this-many)))
-                                           world-state))
-           "]")
-      (map? world-state)
-      (str
-       indentation "{\n"
-       (clojure.string/join "\n"
-                            (map (fn [k]
-                                   (str indentation-plus-1 k " "
-                                        (format-world-state (get world-state k) (+ 1 indent-this-many))))
-                                 (keys world-state)))
-       "\n" indentation "}")
-      :else (str world-state))))
 
 (defn main-template [{:keys [score cur-time jump-count
                              timer-running border-pos
