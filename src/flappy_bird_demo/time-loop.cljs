@@ -19,6 +19,31 @@
 ;;                                        -> time-loop
 ;;
 
+(declare collision?)
+(declare score)
+(declare update-flappy)
+
+(defn time-update [timestamp world-state]
+  (-> world-state
+      (assoc
+       :cur-time timestamp
+       :time-delta (- timestamp (:flappy-start-time world-state)))
+      update-flappy
+      update-pillars
+      collision?
+      score))
+
+(defn time-loop [time world-reference]
+  ;; "partial: Takes a function f and fewer than the normal arguments
+  ;; to f, and returns a fn that takes a variable number of additional
+  ;; args. When called, the returned function calls f with args +
+  ;; additional args."
+  ;; - https://clojuredocs.org/clojure.core/partial
+  (let [new-state (swap! world-reference (partial time-update time))]
+    (when (:timer-running new-state)
+      ;; https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
+      (.requestAnimationFrame js/window (fn [time] (time-loop time world-reference))))))
+
 (defn score [{:keys [cur-time start-time] :as world-state}]
   (let [score (- (.abs js/Math (floor (/ (- (* (- cur-time start-time) horiz-vel) 544)
                                pillar-spacing)))
@@ -51,26 +76,4 @@
       (assoc world-state
         :flappy-y new-y))
     (sine-wave world-state)))
-
-
-(defn time-update [timestamp world-state]
-  (-> world-state
-      (assoc
-       :cur-time timestamp
-       :time-delta (- timestamp (:flappy-start-time world-state)))
-      update-flappy
-      update-pillars
-      collision?
-      score))
-
-(defn time-loop [time world-reference]
-  ;; "partial: Takes a function f and fewer than the normal arguments
-  ;; to f, and returns a fn that takes a variable number of additional
-  ;; args. When called, the returned function calls f with args +
-  ;; additional args."
-  ;; - https://clojuredocs.org/clojure.core/partial
-  (let [new-state (swap! world-reference (partial time-update time))]
-    (when (:timer-running new-state)
-      ;; https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
-      (.requestAnimationFrame js/window (fn [time] (time-loop time world-reference))))))
 
