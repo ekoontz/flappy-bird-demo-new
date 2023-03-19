@@ -93,3 +93,9 @@ body {
         margin: 0px;
     }
 }
+
+div.debug {
+    font-family:monospace;
+    white-space: pre;
+    font-size:small;
+}
