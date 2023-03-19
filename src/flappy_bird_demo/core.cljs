@@ -1,7 +1,7 @@
 (ns flappy-bird-demo.core
   (:require
    [sablono.core :as sab :include-macros true]
-   [flappybird.actions :refer [border jump]]
+   [flappybird.actions :refer [border jump start-game reset-state]]
    [flappybird.defs :refer [bottom-y horiz-vel gravity jump-vel start-y
                             flappy-x flappy-width flappy-height]]
    [flappybird.pillars :refer [in-pillar? in-pillar-gap? pillar-counter pillar-fn
@@ -27,7 +27,6 @@
 
 (declare main-template)
 (declare renderer)
-(declare start-game)
 (declare world)
 
 ;; add-watch -> renderer -> main-template
@@ -71,28 +70,12 @@
                                         (.preventDefault e))}
              [:h1.score score]
              (if-not timer-running
-               (sab/html [:a.start-button {:onClick #(start-game)}
+               (sab/html [:a.start-button {:onClick #(start-game starting-state world-reference time-loop)}
                 (if (< 1 jump-count) "Herstart" "Start")])
                (sab/html [:span]))
              [:div (map pillar-fn pillar-list)]
              [:div.flappy {:style {:top (px flappy-y)}}]
              [:div.scrolling-border {:style {:background-position-x (px border-pos)}}]]))
-
-(defn reset-state [current-time]
-  (-> starting-state
-      (update :pillar-list (partial map #(assoc % :start-time current-time)))
-      (assoc
-       :start-time current-time
-       :flappy-start-time current-time
-       :timer-running true)))
-
-(defn start-game []
-  ;; https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
-  (.requestAnimationFrame
-   js/window
-   (fn [current-time]
-     (reset! world-reference (reset-state current-time))
-     (time-loop current-time world-reference))))
 
 ;; this causes the above 'world-reference' watch to fire:
 (reset! world-reference @world-reference)

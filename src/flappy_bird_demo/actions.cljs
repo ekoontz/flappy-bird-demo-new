@@ -15,3 +15,19 @@
 (defn border [{:keys [cur-time] :as world-state}]
   (-> world-state
       (assoc :border-pos (mod (translate 0 horiz-vel cur-time) 23))))
+
+(defn reset-state [starting-state current-time]
+  (-> starting-state
+      (update :pillar-list (partial map #(assoc % :start-time current-time)))
+      (assoc
+       :start-time current-time
+       :flappy-start-time current-time
+       :timer-running true)))
+
+(defn start-game [starting-state world-reference time-loop-fn]
+  ;; https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
+  (.requestAnimationFrame
+   js/window
+   (fn [current-time]
+     (reset! world-reference (reset-state starting-state current-time))
+     (time-loop-fn current-time world-reference))))
