@@ -25,7 +25,7 @@
 
 (defonce world-reference (atom starting-state))
 
-;; add-watch -> world -> renderer -> main-template
+;; add-watch -> renderer -> main-template
 ;;
 ;; main-template -> (mousedown) -> jump
 ;;               -> (click start button) -> start-game -> time-loop
@@ -48,7 +48,15 @@
              ;; Note that key, reference and old-world-state are all
              ;; ignored (only new-world-state is used below):
              (log/debug (str "world-reference has changed to: " new-world-state "; time to call (renderer)!"))
-             (renderer (world new-world-state))))
+             (renderer (-> new-world-state
+                           border
+                           pillar-offsets))))
+
+(defn renderer [world-state]
+  ;; https://beta.reactjs.org/reference/react-dom/render
+  (.render js/ReactDOM (main-template world-state)
+           ;; see index.html for <div id='board-area'>:
+           (.getElementById js/document "board-area")))
 
 (defn main-template [{:keys [score cur-time jump-count
                              timer-running border-pos
@@ -67,11 +75,6 @@
              [:div.flappy {:style {:top (px flappy-y)}}]
              [:div.scrolling-border {:style {:background-position-x (px border-pos)}}]]))
 
-(defn world [world-state]
-  (-> world-state
-      border
-      pillar-offsets))
-
 (defn reset-state [_ cur-time]
   (-> starting-state
       (update :pillar-list (partial map #(assoc % :start-time cur-time)))
@@ -87,12 +90,6 @@
    (fn [time]
      (reset! world-reference (reset-state @world-reference time))
      (time-loop time world-reference))))
-
-(defn renderer [world-state]
-  ;; https://beta.reactjs.org/reference/react-dom/render
-  (.render js/ReactDOM (main-template world-state)
-           ;; see index.html for <div id='board-area'>:
-           (.getElementById js/document "board-area")))
 
 ;; this causes the above ':renderer-of-the-world' watch to fire:
 (reset! world-reference @world-reference)
