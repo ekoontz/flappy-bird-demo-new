@@ -2,14 +2,11 @@
   (:require
    [sablono.core :as sab :include-macros true]
    [flappybird.actions :refer [border jump start-game]]
-   [flappybird.defs :refer [bottom-y horiz-vel gravity jump-vel start-y
-                            flappy-x flappy-width flappy-height]]
-   [flappybird.pillars :refer [in-pillar? in-pillar-gap? pillar-counter pillar-fn
-                               pillar-offsets pillar-spacing update-pillars]]
+   [flappybird.defs :refer [start-y]]
+   [flappybird.pillars :refer [pillar-counter pillar-fn pillar-offsets]]
    [flappybird.log :as log]
-   [flappybird.time-loop :refer [collision? score sine-wave
-                                 update-flappy time-loop time-update]]
-   [flappybird.util :refer [floor px translate]]))
+   [flappybird.time-loop :refer [collision? time-loop]]
+   [flappybird.util :refer [px]]))
 
 (def starting-state {:timer-running false
                      :jump-count 0
