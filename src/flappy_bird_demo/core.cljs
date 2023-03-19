@@ -1,7 +1,7 @@
 (ns flappy-bird-demo.core
   (:require
    [sablono.core :as sab :include-macros true]
-   [flappybird.actions :refer [border jump start-game reset-state]]
+   [flappybird.actions :refer [border jump start-game]]
    [flappybird.defs :refer [bottom-y horiz-vel gravity jump-vel start-y
                             flappy-x flappy-width flappy-height]]
    [flappybird.pillars :refer [in-pillar? in-pillar-gap? pillar-counter pillar-fn
