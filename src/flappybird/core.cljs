@@ -1,4 +1,4 @@
-(ns flappy-bird-demo.core
+(ns flappybird.core
   (:require
    [sablono.core :as sab :include-macros true]
    [flappybird.actions :refer [border jump start-game]]
