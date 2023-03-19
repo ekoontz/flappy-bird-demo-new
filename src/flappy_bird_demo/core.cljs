@@ -62,8 +62,6 @@
        :flappy-start-time cur-time
        :initial-vel jump-vel)))
 
-;; derivatives
-
 (defn border [{:keys [cur-time] :as world-state}]
   (-> world-state
       (assoc :border-pos (mod (translate 0 horiz-vel cur-time) 23))))
@@ -84,6 +82,12 @@
       score))
 
 (defn time-loop [time]
+
+  ;; "partial: Takes a function f and fewer than the normal arguments
+  ;; to f, and returns a fn that takes a variable number of additional
+  ;; args. When called, the returned function calls f with args +
+  ;; additional args."
+  ;; - https://clojuredocs.org/clojure.core/partial
   (let [new-state (swap! world-reference (partial time-update time))]
     (when (:timer-running new-state)
       ;; https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
@@ -113,10 +117,20 @@
            ;; see index.html for <div id='board-area'>:
            (.getElementById js/document "board-area")))
 
-;; add-watch -> renderer -> main-template -> (mousedown) -> jump
-;;                                        -> (click start button) -> start-game -> time-loop      -> time-update
-;;                                                                                                -> requestAnimationFrame -> time-loop
-;;                                                                              -> reset-state
+;; add-watch -> renderer -> main-template
+;;
+;; main-template -> (mousedown) -> jump
+;;               -> (click start button) -> start-game
+
+;; time-loop     -> time-update -> assoc timestamp
+;;                              -> update-flappy
+;;                              -> update-pillars
+;;                              -> collision?
+;;                              -> score
+;;
+;;               -> requestAnimationFrame -> reset-state
+;;                                        -> time-loop
+;;
 (defn main-template [{:keys [score cur-time jump-count
                              timer-running border-pos
                              flappy-y pillar-list] :as world}]
