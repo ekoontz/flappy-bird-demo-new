@@ -78,21 +78,21 @@
              [:div.flappy {:style {:top (px flappy-y)}}]
              [:div.scrolling-border {:style {:background-position-x (px border-pos)}}]]))
 
-(defn reset-state [_ cur-time]
+(defn reset-state [current-time]
   (-> starting-state
-      (update :pillar-list (partial map #(assoc % :start-time cur-time)))
+      (update :pillar-list (partial map #(assoc % :start-time current-time)))
       (assoc
-       :start-time cur-time
-       :flappy-start-time cur-time
+       :start-time current-time
+       :flappy-start-time current-time
        :timer-running true)))
 
 (defn start-game []
   ;; https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
   (.requestAnimationFrame
    js/window
-   (fn [time]
-     (reset! world-reference (reset-state @world-reference time))
-     (time-loop time world-reference))))
+   (fn [current-time]
+     (reset! world-reference (reset-state current-time))
+     (time-loop current-time world-reference))))
 
 ;; this causes the above 'world-reference' watch to fire:
 (reset! world-reference @world-reference)
