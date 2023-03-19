@@ -25,6 +25,11 @@
 
 (defonce world-reference (atom starting-state))
 
+(declare main-template)
+(declare renderer)
+(declare start-game)
+(declare world)
+
 ;; add-watch -> renderer -> main-template
 ;;
 ;; main-template -> (mousedown) -> jump
@@ -38,12 +43,10 @@
 ;;  the watch with remove-watch, but are otherwise considered
 ;;  opaque by the watch mechanism."
 ;; 
-;; In our case, ':renderer-of-the-world' is such a key, but we don't yet
+;; In our case, ':renderer-key' is such a key, but we don't yet
 ;; use it for anything (e.g. by calling remove-watch). 
-(declare renderer)
-(declare start-game)
-(declare world)
-(add-watch world-reference :renderer-of-the-world
+;;
+(add-watch world-reference :renderer-key
            (fn [key reference old-world-state new-world-state]
              ;; Note that key, reference and old-world-state are all
              ;; ignored (only new-world-state is used below):
@@ -60,7 +63,7 @@
 
 (defn main-template [{:keys [score cur-time jump-count
                              timer-running border-pos
-                             flappy-y pillar-list] :as world}]
+                             flappy-y pillar-list] :as world-state}]
   (reset! pillar-counter 0)
   ;; https://github.com/r0man/sablono
   (sab/html [:div.board {:onMouseDown (fn [e]
@@ -91,7 +94,7 @@
      (reset! world-reference (reset-state @world-reference time))
      (time-loop time world-reference))))
 
-;; this causes the above ':renderer-of-the-world' watch to fire:
+;; this causes the above 'world-reference' watch to fire:
 (reset! world-reference @world-reference)
 
 
