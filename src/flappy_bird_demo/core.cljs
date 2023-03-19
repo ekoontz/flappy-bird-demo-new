@@ -29,10 +29,9 @@
 (declare renderer)
 (declare world)
 
-;; add-watch -> renderer -> main-template
+;; add-watch -> renderer -> main-template -> (mousedown) -> jump
+;;                                        -> (click start button) -> start-game -> time-loop
 ;;
-;; main-template -> (mousedown) -> jump
-;;               -> (click start button) -> start-game -> time-loop
 ;;
 ;; https://clojuredocs.org/clojure.core/add-watch
 ;; "Adds a watch function to an agent/atom/var/ref reference...
