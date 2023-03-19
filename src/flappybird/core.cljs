@@ -67,10 +67,16 @@
              [:h1.score score]
              [:div.debug (format-world-state world-state 0)]
              (if-not timer-running
+               ;; game is paused.
                (sab/html [:a.start-button {:onClick #(start-game starting-state world-reference time-loop)}
-                (if (< 1 jump-count) "Herstart" "Start")])
+
+                          (if (< 1 jump-count) "Herstart" "Start")])
+
+               ;; game is running:
                (sab/html [:span]))
+
              [:div (map pillar-fn pillar-list)]
+
              [:div.flappy {:style {:top (px flappy-y)}}]
              [:div.scrolling-border {:style {:background-position-x (px border-pos)}}]]))
 
