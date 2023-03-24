@@ -15,8 +15,7 @@
 ;;                              -> collision?
 ;;                              -> score
 ;;
-;;               -> requestAnimationFrame -> reset-state
-;;                                        -> time-loop
+;;               -> requestAnimationFrame -> time-loop
 ;;
 
 (declare collision?)
